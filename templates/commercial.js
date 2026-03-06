@@ -301,11 +301,8 @@ function commercialTemplate(doc) {
 <div class="header">
   <div class="logo-block">
     ${s.logo
-        ? `<img src="${s.logo}" style="width:80px;height:80px;border-radius:8px;object-fit:contain;" />`
+        ? `<img src="${s.logo}" style="width:90px;height:90px;border-radius:8px;object-fit:contain;" />`
         : `<div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>`}
-    <div>
-      <div class="logo-name">${escapeHtml(s.name || "Компания")}</div>
-    </div>
   </div>
   <div style="display:flex;align-items:center;gap:20px;">
     <div class="header-info">
