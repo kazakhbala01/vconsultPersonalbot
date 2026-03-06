@@ -152,8 +152,8 @@ function commercialTemplate(doc) {
     letter-spacing: 0.5px;
   }
   .header-info {
-    font-size: 9.5px;
-    line-height: 1.6;
+    font-size: 12px;
+    line-height: 3;
     text-align: right;
   }
   .header-info b { color: #a8c4e0; }
@@ -301,7 +301,7 @@ function commercialTemplate(doc) {
 <div class="header">
   <div class="logo-block">
     ${s.logo
-        ? `<img src="${s.logo}" style="width:90px;height:90px;border-radius:8px;object-fit:contain;" />`
+        ? `<img src="${s.logo}" style="width:110px;height:110px;border-radius:8px;object-fit:contain;" />`
         : `<div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>`}
   </div>
   <div style="display:flex;align-items:center;gap:20px;">
