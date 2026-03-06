@@ -102,7 +102,6 @@ function commercialTemplate(doc) {
     const logoHTML = s.logo
         ? `<div class="logo-wrap">
             <img src="${s.logo}" class="logo-img" />
-            <div class="logo-txt">${escapeHtml(s.name || "")}</div>
            </div>`
         : `<div class="logo-wrap">
             <div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>
