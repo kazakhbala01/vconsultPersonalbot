@@ -842,7 +842,7 @@ bot.on("text", async (ctx) => {
           // Проценты
           nums.forEach((pct, i) => {
             const amount = Math.round(total * pct / 100);
-            bullets.push(`${pct}% — ${labels[i] || `этап ${i + 1}`}: ${amount.toLocaleString("ru")} ₸`);
+            bullets.push(`${pct}% — ${labels[i] || `этап ${i + 1}`}: ₸${amount.toLocaleString("ru-RU", {minimumFractionDigits:2, maximumFractionDigits:2})}`);
           });
         }
       }

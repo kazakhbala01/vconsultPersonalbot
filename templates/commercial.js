@@ -5,6 +5,23 @@
 
 const { formatNum, escapeHtml } = require("./utils");
 
+/** Форматирует суммы в payment bullets: "1740000 ₸" → "₸1 740 000,00", "₸1740000" → "₸1 740 000,00" */
+function formatPaymentBullet(text) {
+    // "₸1740000" or "₸1 740 000" → "₸1 740 000,00"
+    let result = text.replace(/₸\s*([\d][\d\s]*[\d])/g, (match, numStr) => {
+        const num = Number(numStr.replace(/\s/g, ""));
+        if (isNaN(num) || num === 0) return match;
+        return "₸" + formatNum(num);
+    });
+    // "1740000 ₸" → "₸1 740 000,00"
+    result = result.replace(/([\d][\d\s]*[\d])\s*₸/g, (match, numStr) => {
+        const num = Number(numStr.replace(/\s/g, ""));
+        if (isNaN(num) || num === 0) return match;
+        return "₸" + formatNum(num);
+    });
+    return result;
+}
+
 function commercialTemplate(doc) {
     const s = doc.seller || {};
     const b = doc.buyer || {};
@@ -46,7 +63,6 @@ function commercialTemplate(doc) {
 
     // ─── 3. Условия оплаты ───
     const paymentBullets = kp.paymentBullets || [];
-    // Обратная совместимость: если sections есть и в них есть оплата — берём оттуда
     const fallbackPayment = (kp.sections || []).find(sec =>
         (sec.heading || "").toLowerCase().includes("оплат") || (sec.heading || "").toLowerCase().includes("расчёт")
     );
@@ -58,14 +74,13 @@ function commercialTemplate(doc) {
     <div class="section">
       <div class="sec-heading">3. Условия оплаты</div>
       ${finalPaymentBullets.length > 0
-        ? `<ul class="bullets">${finalPaymentBullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`
+        ? `<ul class="bullets">${finalPaymentBullets.map(b => `<li>${formatPaymentBullet(escapeHtml(b))}</li>`).join("")}</ul>`
         : `<div class="sec-text">Условия оплаты согласовываются отдельно.</div>`
     }
     </div>`;
 
     // ─── 4. Дополнительные условия (только если есть) ───
     const extraBullets = kp.extraBullets || [];
-    // Обратная совместимость
     const fallbackExtra = (kp.sections || []).find(sec =>
         (sec.heading || "").toLowerCase().includes("дополнительн")
     );
@@ -79,7 +94,7 @@ function commercialTemplate(doc) {
       <ul class="bullets">${finalExtraBullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>
     </div>` : "";
 
-    // ─── Подпись + печать ───
+    // ─── Подпись + печать (как на фото: ФИО слева, печать+подпись рядом, линия) ───
     const directorName = s.director || "";
     const signStampImg = s.signstamp
         ? `<img src="${s.signstamp}" class="signstamp-img" />`
@@ -88,10 +103,15 @@ function commercialTemplate(doc) {
     const signatureBlock = `
     <div class="signature-section">
       <div class="sig-role">Руководитель</div>
-      <div class="sig-stamp-area">
-        ${signStampImg}
+      <div class="sig-bottom">
+        <div class="sig-fio">${escapeHtml(directorName)}</div>
+        <div class="sig-line-and-stamp">
+          <div class="sig-stamp-over">
+            ${signStampImg}
+          </div>
+          <div class="sig-line"></div>
+        </div>
       </div>
-      <div class="sig-fio">${escapeHtml(directorName)}</div>
     </div>`;
 
     return `<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"/>
@@ -199,7 +219,7 @@ function commercialTemplate(doc) {
     color: #1a2332;
   }
 
-  /* ═══ Table — blue theme ═══ */
+  /* table blue */
   .tbl {
     width: 100%;
     border-collapse: separate;
@@ -230,7 +250,7 @@ function commercialTemplate(doc) {
   .c { text-align: center; }
   .r { text-align: right; }
 
-  /* ═══ Signature + stamp ═══ */
+  /* ═══ Signature — like the reference photo ═══ */
   .signature-section {
     margin-top: 40px;
   }
@@ -238,21 +258,46 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
-  .sig-stamp-area {
-    min-height: 70px;
-    margin-bottom: 10px;
-  }
-  .signstamp-img {
-    max-height: 120px;
-    max-width: 280px;
-    object-fit: contain;
+  .sig-bottom {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    position: relative;
   }
   .sig-fio {
     font-size: 12px;
     font-weight: 700;
     color: #1a1a1a;
+    white-space: nowrap;
+    padding-bottom: 2px;
+    position: relative;
+    z-index: 2;
+  }
+  .sig-line-and-stamp {
+    position: relative;
+    flex: 1;
+    min-height: 80px;
+    margin-left: -10px;
+  }
+  .sig-stamp-over {
+    position: absolute;
+    bottom: 4px;
+    left: 10px;
+    z-index: 1;
+  }
+  .signstamp-img {
+    max-height: 130px;
+    max-width: 300px;
+    object-fit: contain;
+  }
+  .sig-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #000;
   }
 </style>
 <body>
