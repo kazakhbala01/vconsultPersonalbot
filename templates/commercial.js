@@ -283,7 +283,7 @@ function commercialTemplate(doc) {
   }
   .sig-stamp-overlay {
     position: absolute;
-    bottom: -110px;
+    bottom: -111px;
     left: 80px;
     z-index: 1;
   }
