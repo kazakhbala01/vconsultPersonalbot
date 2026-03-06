@@ -258,16 +258,13 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 24px;
+    margin-bottom: 80px;
   }
   .sig-bottom {
     position: relative;
-    height: 130px;
   }
   .sig-fio-wrap {
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    position: relative;
     display: flex;
     align-items: baseline;
     z-index: 2;
@@ -280,15 +277,14 @@ function commercialTemplate(doc) {
   }
   .sig-line {
     display: inline-block;
-    width: 180px;
+    width: 200px;
     border-bottom: 1px solid #000;
-    margin-left: 0;
     vertical-align: baseline;
   }
   .sig-stamp-overlay {
     position: absolute;
-    bottom: -20px;
-    left: 120px;
+    bottom: -75px;
+    left: 80px;
     z-index: 1;
   }
   .signstamp-img {
