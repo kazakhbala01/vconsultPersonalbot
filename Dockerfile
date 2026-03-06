@@ -34,7 +34,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 
 # Код
-COPY ../../AppData/Local/Temp .
+COPY . .
 
 # Папка для логов
 RUN mkdir -p logs
