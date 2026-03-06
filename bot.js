@@ -413,6 +413,13 @@ bot.action("pf_confirm", async (ctx) => {
   ctx.answerCbQuery();
   const st = states.get(ctx.from.id);
   if (!st?.profileData) return;
+
+  // Санитизация: проверяем что директор не мусор
+  const d = st.profileData.director || "";
+  if (d.length > 60 || /\d{5,}/.test(d) || /\b(разработк|настройк|итого|срок|оплата|сайт|crm|усл|шт)\b/i.test(d)) {
+    st.profileData.director = "";
+  }
+
   await db.saveProfile(ctx.from.id, st.profileData, ctx.from.username, ctx.from.first_name);
   states.delete(ctx.from.id);
   ctx.editMessageText("✅ Профиль сохранён!");
