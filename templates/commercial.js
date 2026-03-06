@@ -260,7 +260,7 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 80px;
+    margin-bottom: 30px;
   }
   .sig-bottom {
     position: relative;
@@ -301,7 +301,7 @@ function commercialTemplate(doc) {
 <div class="header">
   <div class="logo-block">
     ${s.logo
-        ? `<img src="${s.logo}" style="width:70px;height:70px;border-radius:8px;object-fit:contain;" />`
+        ? `<img src="${s.logo}" style="width:80px;height:80px;border-radius:8px;object-fit:contain;" />`
         : `<div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>`}
     <div>
       <div class="logo-name">${escapeHtml(s.name || "Компания")}</div>
