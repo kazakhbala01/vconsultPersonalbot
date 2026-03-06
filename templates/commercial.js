@@ -94,7 +94,7 @@ function commercialTemplate(doc) {
       <ul class="bullets">${finalExtraBullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>
     </div>` : "";
 
-    // ─── Подпись + печать (как на фото: ФИО слева, печать+подпись рядом, линия) ───
+    // ─── Подпись + печать (как на фото: ФИО слева, печать накладывается на линию) ───
     const directorName = s.director || "";
     const signStampImg = s.signstamp
         ? `<img src="${s.signstamp}" class="signstamp-img" />`
@@ -104,12 +104,11 @@ function commercialTemplate(doc) {
     <div class="signature-section">
       <div class="sig-role">Руководитель</div>
       <div class="sig-bottom">
-        <div class="sig-fio">${escapeHtml(directorName)}</div>
-        <div class="sig-line-and-stamp">
-          <div class="sig-stamp-over">
-            ${signStampImg}
-          </div>
-          <div class="sig-line"></div>
+        <div class="sig-fio-wrap">
+          <span class="sig-fio">${escapeHtml(directorName)}</span><span class="sig-line"></span>
+        </div>
+        <div class="sig-stamp-overlay">
+          ${signStampImg}
         </div>
       </div>
     </div>`;
@@ -250,54 +249,52 @@ function commercialTemplate(doc) {
   .c { text-align: center; }
   .r { text-align: right; }
 
-  /* ═══ Signature — like the reference photo ═══ */
+  /* ═══ Signature — matches reference photo ═══ */
   .signature-section {
     margin-top: 40px;
+    position: relative;
   }
   .sig-role {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
   }
   .sig-bottom {
-    display: flex;
-    align-items: flex-end;
-    gap: 0;
     position: relative;
+    height: 130px;
+  }
+  .sig-fio-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: baseline;
+    z-index: 2;
   }
   .sig-fio {
     font-size: 12px;
     font-weight: 700;
     color: #1a1a1a;
     white-space: nowrap;
-    padding-bottom: 2px;
-    position: relative;
-    z-index: 2;
   }
-  .sig-line-and-stamp {
-    position: relative;
-    flex: 1;
-    min-height: 80px;
-    margin-left: -10px;
+  .sig-line {
+    display: inline-block;
+    width: 180px;
+    border-bottom: 1px solid #000;
+    margin-left: 0;
+    vertical-align: baseline;
   }
-  .sig-stamp-over {
+  .sig-stamp-overlay {
     position: absolute;
-    bottom: 4px;
-    left: 10px;
+    bottom: -20px;
+    left: 120px;
     z-index: 1;
   }
   .signstamp-img {
-    max-height: 130px;
-    max-width: 300px;
+    width: 160px;
+    height: 160px;
     object-fit: contain;
-  }
-  .sig-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-bottom: 1px solid #000;
   }
 </style>
 <body>
