@@ -785,6 +785,19 @@ bot.on("text", async (ctx) => {
       const recalcTotal = (kpData.items || []).reduce((s, i) => s + (i.price || 0), 0);
       if (recalcTotal > 0) kpData.total = recalcTotal;
 
+      // Валидация: проверяем что есть реальные позиции с ценами
+      const validItems = (kpData.items || []).filter(i => i.name && i.name !== "описание работы" && (i.price || 0) > 0);
+      if (!validItems.length) {
+        return ctx.reply(
+            "⚠️ Не удалось распознать позиции и цены.\n\n" +
+            "Укажите работы с ценами чётко, например:\n" +
+            "Разработка сайта 1000000\n" +
+            "Настройка CRM 170000\n\n" +
+            "Отправьте данные ещё раз:",
+            cancelKb
+        );
+      }
+
       // Проверяем есть ли условия оплаты
       const hasPayment = (kpData.paymentBullets && kpData.paymentBullets.length > 0) ||
           kpData.sections?.some(s =>
@@ -1082,17 +1095,23 @@ bot.on("text", async (ctx) => {
     }
     if (lower.includes("измен") || lower === "✏️ изменить") {
       states.set(uid, { mode: "doc_edit", document: st.document, docType: st.docType });
-      return ctx.reply(
-          "✏️ Напишите что изменить, например:\n\n" +
+      const editHint = st.docType === "commercial"
+          ? "✏️ Напишите что изменить, например:\n\n" +
+          "• клиент ТОО Новая 123456789012 Алматы\n" +
+          "• цену первой позиции 500000\n" +
+          "• добавь: тех поддержка 120000\n" +
+          "• убери вторую позицию\n" +
+          "• срок 3 месяца\n\n" +
+          "Или «заново» чтобы ввести всё с нуля."
+          : "✏️ Напишите что изменить, например:\n\n" +
           "• покупатель ТОО Новая 123456789012 Алматы\n" +
           "• договор №25\n" +
           "• цену первой позиции 50000\n" +
           "• добавь: монтаж 1 усл 30000\n" +
           "• убери вторую позицию\n" +
           "• дата сегодня\n\n" +
-          "Или «заново» чтобы ввести всё с нуля.",
-          cancelKb
-      );
+          "Или «заново» чтобы ввести всё с нуля.";
+      return ctx.reply(editHint, cancelKb);
     }
     states.delete(uid);
     return ctx.reply("❌ Отменено.", mainKb);
@@ -1155,6 +1174,25 @@ bot.on("text", async (ctx) => {
         }));
         doc.grandTotal = doc.items.reduce((s, i) => s + i.total, 0);
         doc.totalWords = doc.grandTotal > 0 ? numberToWords(doc.grandTotal) : "";
+      }
+
+      // ─── КП: синхронизируем kpData с doc.items ───
+      if (st.docType === "commercial" && doc.kpData) {
+        if (doc.items?.length) {
+          doc.kpData.items = doc.items.map(i => ({
+            name: i.name || "",
+            price: i.total || i.price || 0,
+          }));
+          const recalc = doc.items.reduce((s, i) => s + (i.total || i.price || 0), 0);
+          if (recalc > 0) {
+            doc.kpData.total = recalc;
+            doc.grandTotal = recalc;
+            doc.totalWords = numberToWords(recalc);
+            doc.kpData.totalWords = doc.totalWords;
+          }
+        }
+        if (changes.buyer) doc.kpData.buyer = doc.buyer;
+        return showKPDraft(ctx, uid, doc, doc.kpData, doc.seller);
       }
 
       const draft = formatDraft(doc);
@@ -1546,7 +1584,7 @@ process.once("SIGTERM", async () => { await closeBrowser(); await db.close(); bo
   const missing = required.filter(k => !process.env[k]);
   if (missing.length) {
     console.error(`❌ Не заданы переменные окружения: ${missing.join(", ")}`);
-    console.error("   Скопируйте .env.example в .env и заполните её.");
+    console.error("   Скопируйте .env.example в .env и заполните.");
     process.exit(1);
   }
 

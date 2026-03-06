@@ -26,7 +26,14 @@ function commercialTemplate(doc) {
     const s = doc.seller || {};
     const b = doc.buyer || {};
     const kp = doc.kpData || {};
-    const items = kp.items || doc.items || [];
+    // Items: берём из kpData, fallback на doc.items, фильтруем нулевые
+    let rawItems = kp.items || doc.items || [];
+    // Если kpData.items пустые или все с ценой 0 — пробуем doc.items
+    const kpHasPrice = rawItems.some(i => (typeof i === "object" ? (i.price || i.total || 0) : 0) > 0);
+    if (!kpHasPrice && doc.items?.length) {
+        rawItems = doc.items;
+    }
+    const items = rawItems.filter(i => typeof i === "object" ? (i.name && i.name !== "описание работы") : !!i);
     const itemsTotal = items.reduce((sum, i) => sum + (typeof i === "object" ? (i.price || i.total || 0) : 0), 0);
     const total = itemsTotal > 0 ? itemsTotal : (kp.total || doc.grandTotal || 0);
     const totalWords = kp.totalWords || doc.totalWords || "";
@@ -152,8 +159,8 @@ function commercialTemplate(doc) {
     letter-spacing: 0.5px;
   }
   .header-info {
-    font-size: 12px;
-    line-height: 3;
+    font-size: 9.5px;
+    line-height: 1.6;
     text-align: right;
   }
   .header-info b { color: #a8c4e0; }
@@ -301,8 +308,11 @@ function commercialTemplate(doc) {
 <div class="header">
   <div class="logo-block">
     ${s.logo
-        ? `<img src="${s.logo}" style="width:110px;height:110px;border-radius:8px;object-fit:contain;" />`
+        ? `<img src="${s.logo}" style="width:120px;height:120px;border-radius:8px;object-fit:contain;" />`
         : `<div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>`}
+    <div>
+      <div class="logo-name">${escapeHtml(s.name || "Компания")}</div>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:20px;">
     <div class="header-info">
