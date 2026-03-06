@@ -259,7 +259,7 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 80px;
+    margin-bottom: 40px;
   }
   .sig-bottom {
     position: relative;
