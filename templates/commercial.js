@@ -27,7 +27,8 @@ function commercialTemplate(doc) {
     const b = doc.buyer || {};
     const kp = doc.kpData || {};
     const items = kp.items || doc.items || [];
-    const total = kp.total || doc.grandTotal || items.reduce((sum, i) => sum + (i.total || 0), 0);
+    const itemsTotal = items.reduce((sum, i) => sum + (typeof i === "object" ? (i.price || i.total || 0) : 0), 0);
+    const total = itemsTotal > 0 ? itemsTotal : (kp.total || doc.grandTotal || 0);
     const totalWords = kp.totalWords || doc.totalWords || "";
 
     // ─── 1. Состав и стоимость работ (таблица) ───
@@ -123,7 +124,7 @@ function commercialTemplate(doc) {
   .header {
     background: #1a2332;
     color: #fff;
-    padding: 20px 28px;
+    padding: 20px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -134,19 +135,19 @@ function commercialTemplate(doc) {
     gap: 16px;
   }
   .logo-icon {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     background: linear-gradient(135deg, #4a90d9, #357abd);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 34px;
     font-weight: bold;
     color: white;
   }
   .logo-name {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.5px;
   }
@@ -168,7 +169,7 @@ function commercialTemplate(doc) {
   .buyer-block b { color: #ffffff; }
 
   /* content */
-  .content { padding: 24px 32px; }
+  .content { padding: 24px 18px; }
 
   .title {
     text-align: center;
@@ -259,7 +260,7 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 40px;
+    margin-bottom: 80px;
   }
   .sig-bottom {
     position: relative;
@@ -300,7 +301,7 @@ function commercialTemplate(doc) {
 <div class="header">
   <div class="logo-block">
     ${s.logo
-        ? `<img src="${s.logo}" style="width:50px;height:50px;border-radius:8px;object-fit:contain;" />`
+        ? `<img src="${s.logo}" style="width:70px;height:70px;border-radius:8px;object-fit:contain;" />`
         : `<div class="logo-icon">${(s.name || "K")[0].toUpperCase()}</div>`}
     <div>
       <div class="logo-name">${escapeHtml(s.name || "Компания")}</div>

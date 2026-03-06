@@ -781,6 +781,10 @@ bot.on("text", async (ctx) => {
       const kpData = await ai.generateKP(textForAI, seller.name || "");
       if (!kpData) return ctx.reply("⚠️ Не удалось распознать. Попробуйте ещё раз.", cancelKb);
 
+      // Пересчитываем итого из позиций (AI иногда считает неправильно)
+      const recalcTotal = (kpData.items || []).reduce((s, i) => s + (i.price || 0), 0);
+      if (recalcTotal > 0) kpData.total = recalcTotal;
+
       // Проверяем есть ли условия оплаты
       const hasPayment = (kpData.paymentBullets && kpData.paymentBullets.length > 0) ||
           kpData.sections?.some(s =>
