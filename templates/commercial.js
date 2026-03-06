@@ -288,8 +288,8 @@ function commercialTemplate(doc) {
     z-index: 1;
   }
   .signstamp-img {
-    width: 54mm;
-    height: 54mm;
+    width: 62mm;
+    height: 62mm;
     object-fit: contain;
 }
 </style>
