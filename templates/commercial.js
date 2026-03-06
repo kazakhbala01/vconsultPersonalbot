@@ -160,7 +160,7 @@ body{font-family:'DejaVu Sans','Arial',sans-serif;font-size:11px;color:#1a1a1a;l
 .sig-section{margin-top:40px;position:relative;}
 .sig-role{font-size:12px;color:#1a1a1a;margin-bottom:20px;}
 .sig-area{position:relative;height:120px;}
-.sig-stamp{position:absolute;bottom:-60px;left:80px;z-index:1;}
+.sig-stamp{position:absolute;bottom:-140px;left:80px;z-index:1;}
 .signstamp-img{width:68mm;height:68mm;object-fit:contain;}
 .sig-fio-line{position:absolute;bottom:0;left:0;display:flex;align-items:baseline;z-index:2;}
 .sig-fio{font-size:12px;font-weight:700;color:#1a1a1a;white-space:nowrap;}
@@ -171,7 +171,7 @@ body{font-family:'DejaVu Sans','Arial',sans-serif;font-size:11px;color:#1a1a1a;l
 <div class="header">
   ${logoHTML}
   <div class="hdr-center">
-    <b>${escapeHtml(s.name ? (s.name.includes("«") ? s.name : `«${s.name}»`) : "")}:</b><br/>
+    <b>${escapeHtml(s.name ? (s.name.includes("") ? s.name : `${s.name}`) : "")}:</b><br/>
     ИИК: ${escapeHtml(s.iik || "")}<br/>
     Банк: ${escapeHtml(s.bank || "")}<br/>
     БИК: ${escapeHtml(s.bik || "")}<br/>
