@@ -819,7 +819,13 @@ bot.on("text", async (ctx) => {
 
       // Пересчитываем итого из позиций (AI иногда считает неправильно)
       const recalcTotal = (kpData.items || []).reduce((s, i) => s + (i.price || 0), 0);
-      if (recalcTotal > 0) kpData.total = recalcTotal;
+      if (recalcTotal > 0) {
+        kpData.total = recalcTotal;
+        // Пересчитываем сумму прописью если изменилась
+        if (!kpData.totalWords || kpData.totalWords === "") {
+          kpData.totalWords = numberToWords(recalcTotal);
+        }
+      }
 
       // Валидация: проверяем что есть реальные позиции с ценами
       const validItems = (kpData.items || []).filter(i => i.name && i.name !== "описание работы" && (i.price || 0) > 0);
@@ -882,17 +888,23 @@ bot.on("text", async (ctx) => {
       const kpData = st.kpData;
       const total = kpData.total || 0;
 
-      // Парсим условия оплаты из текста юзера
+      // Пересчитываем totalWords если нет
+      if (!kpData.totalWords && total > 0) {
+        kpData.totalWords = numberToWords(total);
+      }
+
       const paymentText = text.trim();
       const parts = paymentText.match(/(\d+)/g);
       let bullets = [];
 
-      if (parts && parts.length >= 2) {
-        const labels = ["аванс при подписании договора", "промежуточный этап", "после завершения работ и подписания акта", "четвёртый этап"];
+      if (parts && parts.length === 1 && Number(parts[0]) === 100) {
+        // "100% предоплата"
+        bullets.push(`100% — предоплата при подписании договора: ₸${total.toLocaleString("ru-RU", {minimumFractionDigits:2, maximumFractionDigits:2})}`);
+      } else if (parts && parts.length >= 2) {
+        const labels = ["предоплата при подписании договора", "промежуточный этап", "после завершения работ и подписания акта", "четвёртый этап"];
         const nums = parts.map(Number);
         const sum = nums.reduce((a, b) => a + b, 0);
-        if (sum === 100 || sum <= parts.length) {
-          // Проценты
+        if (sum === 100) {
           nums.forEach((pct, i) => {
             const amount = Math.round(total * pct / 100);
             bullets.push(`${pct}% — ${labels[i] || `этап ${i + 1}`}: ₸${amount.toLocaleString("ru-RU", {minimumFractionDigits:2, maximumFractionDigits:2})}`);
@@ -904,7 +916,6 @@ bot.on("text", async (ctx) => {
         bullets = [paymentText];
       }
 
-      // Сохраняем условия оплаты
       kpData.paymentBullets = bullets;
 
       const doc = {
@@ -1258,16 +1269,17 @@ function showKPDraft(ctx, uid, doc, kpData, seller) {
   draftLines.push(`📄 ${kpData.subtitle || ""}`);
   draftLines.push(``);
   if (seller?.name) draftLines.push(`🏢 Исполнитель: ${seller.name}`);
-  if (kpData.buyer?.name) draftLines.push(`👤 Клиент: ${kpData.buyer.name}`);
+  if (kpData.buyer?.name) draftLines.push(`👤 Клиент: ${kpData.buyer.name}${kpData.buyer.bin ? ` (${kpData.buyer.bin})` : ""}${kpData.buyer.address ? `, ${kpData.buyer.address}` : ""}`);
 
-  // 1. Работы
-  if (kpData.items?.length) {
+  // 1. Работы (фильтруем пустые)
+  const validItems = (kpData.items || []).filter(i => i.name && (i.price || 0) > 0);
+  if (validItems.length) {
     draftLines.push(``);
     draftLines.push(`📦 1. Состав и стоимость работ:`);
-    kpData.items.forEach((item, i) => {
+    validItems.forEach((item, i) => {
       draftLines.push(`  ${i + 1}. ${item.name} — ${(item.price || 0).toLocaleString("ru")} ₸`);
     });
-    draftLines.push(`💰 Итого: ${(kpData.total || 0).toLocaleString("ru")} KZT`);
+    draftLines.push(`💰 Итого: ${(kpData.total || 0).toLocaleString("ru")} ₸`);
     if (kpData.totalWords) draftLines.push(`💬 ${kpData.totalWords} тенге`);
   }
 
