@@ -283,15 +283,15 @@ function commercialTemplate(doc) {
   }
   .sig-stamp-overlay {
     position: absolute;
-    bottom: -85px;
+    bottom: -100px;
     left: 80px;
     z-index: 1;
   }
   .signstamp-img {
-    width: 160px;
-    height: 160px;
+    width: 48mm;
+    height: 48mm;
     object-fit: contain;
-  }
+}
 </style>
 <body>
 
