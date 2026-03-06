@@ -1,0 +1,12 @@
+node_modules
+.env
+.git
+.github
+.idea
+logs/*.log
+*.md
+fly.toml
+railway.json
+render.yaml
+Dockerfile
+.dockerignore

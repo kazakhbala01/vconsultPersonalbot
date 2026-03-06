@@ -1,0 +1,22 @@
+name: Deploy VConsult Bot
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 173.249.51.242
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /srv/vconsult-bot
+            git pull origin main
+            npm install --production
+            pm2 restart vconsult-bot || pm2 start bot.js --name vconsult-bot
+            echo "✅ Deployed at $(date)"

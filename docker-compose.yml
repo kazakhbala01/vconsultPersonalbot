@@ -1,0 +1,26 @@
+# docker compose up — для локального теста
+# docker compose up -d — в фоне
+
+services:
+  bot:
+    build: ../../AppData/Local/Temp
+    env_file: .env
+    restart: unless-stopped
+    # Если БД тоже локальная:
+    # depends_on:
+    #   - db
+
+  # Раскомментируй если нужна локальная БД:
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: docagent
+  #     POSTGRES_PASSWORD: docagent
+  #     POSTGRES_DB: docagent
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+
+# volumes:
+#   pgdata:

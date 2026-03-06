@@ -1,0 +1,23 @@
+# ═══════════════════════════════════════
+# Fly.io — fly launch / fly deploy
+# ═══════════════════════════════════════
+
+app = "docagent-bot"
+primary_region = "waw"  # Варшава — ближайший к Астане
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Бот не слушает HTTP, но Fly требует порт
+# Можно убрать если используешь --no-public-ips
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false   # НЕ останавливать — бот должен работать 24/7
+  auto_start_machines = true
+  min_machines_running = 1     # Всегда 1 машина
+
+[vm]
+  memory = "512mb"   # Chromium нужно ~300MB
+  cpu_kind = "shared"
+  cpus = 1
