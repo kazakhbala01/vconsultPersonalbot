@@ -1546,7 +1546,7 @@ process.once("SIGTERM", async () => { await closeBrowser(); await db.close(); bo
   const missing = required.filter(k => !process.env[k]);
   if (missing.length) {
     console.error(`❌ Не заданы переменные окружения: ${missing.join(", ")}`);
-    console.error("   Скопируйте .env.example в .env и заполните.");
+    console.error("   Скопируйте .env.example в .env и заполните её.");
     process.exit(1);
   }
 
