@@ -284,8 +284,14 @@ bot.on("photo", async (ctx) => {
 
     const lower = text.toLowerCase();
     if (lower.includes("бин") || lower.includes("иин") || lower.includes("иик") || lower.includes("бик") || lower.includes("бенефициар")) {
-      states.set(uid, { mode: "profile_input" });
-      return processRecognizedText(ctx, text);
+      // Не переключаем в профиль автоматически — сохраняем в контекст
+      const preview = text.length > 200 ? text.substring(0, 200) + "..." : text;
+      return ctx.reply(
+          `📷 Распознаны реквизиты:\n${preview}\n\n` +
+          `💡 Чтобы сохранить как профиль — нажмите ⚙️ Профиль\n` +
+          `Или выберите документ — данные подставятся автоматически.`,
+          mainKb
+      );
     }
 
     const preview = text.length > 200 ? text.substring(0, 200) + "..." : text;
@@ -627,17 +633,28 @@ bot.on("text", async (ctx) => {
     const profile = st.partialProfile;
     const value = text.trim();
 
+    // Защита: если текст похож на данные документа (цены, работы) — не парсим как профиль
+    const looksLikeDocData = /\d{5,}\s*(₸|тенге|тг)/i.test(value) ||
+        /\b(разработк|настройк|внедрен|сайт|crm|приложен|бот|автоматиз|дизайн|итого|срок|оплата)\b/i.test(value);
+    if (looksLikeDocData && st.missingFields.length > 1) {
+      return ctx.reply(
+          "⚠️ Похоже это данные для документа, а не для профиля.\n\n" +
+          "Сейчас заполняем профиль. Нужно:\n" +
+          st.missingFields.map(m => `  ❌ ${m}`).join("\n") +
+          "\n\nОтправьте эти данные, или /cancel чтобы выйти.",
+          cancelKb
+      );
+    }
+
     // Пробуем заполнить ВСЕ недостающие поля из одного сообщения
     for (const field of st.missingFields) {
       if (field.includes("Название")) {
-        // Ищем ИП/ТОО + название в тексте
         const nameMatch = value.match(/(ИП|ТОО|АО)\s+.+/i);
         if (nameMatch) {
           profile.name = capitalizeName(nameMatch[0].replace(/\b\d{12}\b/, "").trim());
           if (/^ИП\b/i.test(nameMatch[0])) profile.kbe = "19";
           else profile.kbe = "17";
         } else if (st.missingFields.length === 1) {
-          // Если это единственное поле — берём весь текст
           profile.name = capitalizeName(value);
         }
       } else if (field.includes("ИИН/БИН")) {
@@ -648,7 +665,6 @@ bot.on("text", async (ctx) => {
         const cities = ["Астана","Алматы","Шымкент","Караганда","Актобе","Актау","Атырау","Павлодар","Семей","Костанай","Тараз","Уральск"];
         for (const city of cities) {
           if (value.toLowerCase().includes(city.toLowerCase())) {
-            // Берём город + всё что после него (улица итд)
             const idx = value.toLowerCase().indexOf(city.toLowerCase());
             profile.address = value.substring(idx).replace(/\b\d{12}\b/, "").trim() || city;
             break;
@@ -661,27 +677,40 @@ bot.on("text", async (ctx) => {
           "каспи": { bank: 'АО "Kaspi Bank"', bik: "CASPKZKA" },
           "kaspi": { bank: 'АО "Kaspi Bank"', bik: "CASPKZKA" },
           "халык": { bank: 'АО "Халык банк"', bik: "HSBKKZKX" },
+          "halyk": { bank: 'АО "Халык банк"', bik: "HSBKKZKX" },
           "форте": { bank: 'АО "ForteBank"', bik: "IRTYKZKA" },
+          "forte": { bank: 'АО "ForteBank"', bik: "IRTYKZKA" },
           "жусан": { bank: 'АО "Jusan Bank"', bik: "TSABORGS" },
+          "jusan": { bank: 'АО "Jusan Bank"', bik: "TSABORGS" },
           "бцк": { bank: 'АО "Bank CenterCredit"', bik: "KCJBKZKX" },
+          "center": { bank: 'АО "Bank CenterCredit"', bik: "KCJBKZKX" },
+          "евразийский": { bank: 'АО "Евразийский банк"', bik: "EUABORGS" },
+          "altyn": { bank: 'АО "Altyn Bank"', bik: "ATYNKZKA" },
+          "алтын": { bank: 'АО "Altyn Bank"', bik: "ATYNKZKA" },
+          "bereke": { bank: 'АО "Bereke Bank"', bik: "SABRKZKA" },
+          "береке": { bank: 'АО "Bereke Bank"', bik: "SABRKZKA" },
         };
         for (const [key, val] of Object.entries(banks)) {
           if (lower.includes(key)) { profile.bank = val.bank; profile.bik = val.bik; break; }
         }
         if (!profile.bank && st.missingFields.length === 1) profile.bank = value;
       } else if (field.includes("ИИК")) {
-        const iikMatch = value.match(/KZ\w{10,20}/i);
+        const iikMatch = value.match(/KZ\w{5,20}/i);
         if (iikMatch) profile.iik = iikMatch[0].toUpperCase();
-        else if (st.missingFields.length === 1) profile.iik = value.toUpperCase();
+        else if (st.missingFields.length === 1 && value.length >= 10) profile.iik = value.toUpperCase();
       } else if (field.includes("руководителя")) {
-        // Берём текст без БИН, без KZ..., без банков, без городов
+        // Берём текст без БИН, без KZ..., без банков, без городов, без цифр
         let director = value;
-        director = director.replace(/\b\d{12}\b/g, "");
-        director = director.replace(/\bKZ\w{10,20}\b/gi, "");
-        const skipWords = ["каспи","kaspi","халык","форте","жусан","бцк","астана","алматы","шымкент","караганда","актобе"];
+        director = director.replace(/\b\d{5,}\b/g, ""); // убираем длинные числа
+        director = director.replace(/\bKZ\w{5,20}\b/gi, "");
+        const skipWords = ["каспи","kaspi","халык","форте","жусан","бцк","астана","алматы","шымкент","караганда","актобе",
+          "банк","bank","иик","бик","кбе","кнп","бин","иин","адрес","ао","ип","тоо"];
         skipWords.forEach(w => { director = director.replace(new RegExp(`\\b${w}\\b`, "gi"), ""); });
-        director = director.replace(/\s+/g, " ").trim();
-        if (director) profile.director = capitalizeName(director);
+        director = director.replace(/[""«»]/g, "").replace(/\s+/g, " ").trim();
+        // Только если осталось 2-40 символов и выглядит как ФИО (кириллица + точки)
+        if (director && director.length >= 2 && director.length <= 60 && /[а-яА-ЯёЁәғқңөүұһіӘҒҚҢӨҮҰҺІ]/u.test(director)) {
+          profile.director = capitalizeName(director);
+        }
       }
     }
 
