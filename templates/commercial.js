@@ -171,7 +171,7 @@ body{font-family:'DejaVu Sans','Arial',sans-serif;font-size:11px;color:#1a1a1a;l
 <div class="header">
   ${logoHTML}
   <div class="hdr-center">
-    <b>${escapeHtml(s.name ? (s.name.includes("") ? s.name : `${s.name}`) : "")}:</b><br/>
+    <b>${escapeHtml(s.name ? (s.name.includes("") ? s.name : `${s.name}`) : "")}</b><br/>
     ИИК: ${escapeHtml(s.iik || "")}<br/>
     Банк: ${escapeHtml(s.bank || "")}<br/>
     БИК: ${escapeHtml(s.bik || "")}<br/>
