@@ -157,14 +157,15 @@ function commercialTemplate(doc) {
   }
   .header-info b { color: #a8c4e0; }
   .buyer-block {
-    background: #f0f4f8;
-    color: #1a2332;
-    font-size: 10px;
-    padding: 8px 14px;
-    border-radius: 4px;
-    max-width: 220px;
-    line-height: 1.4;
+    color: #ffffff;
+    font-size: 9.5px;
+    line-height: 1.6;
+    text-align: left;
+    max-width: 240px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    padding-left: 16px;
   }
+  .buyer-block b { color: #ffffff; }
 
   /* content */
   .content { padding: 24px 32px; }
@@ -258,7 +259,7 @@ function commercialTemplate(doc) {
     font-size: 12px;
     font-weight: 400;
     color: #1a1a1a;
-    margin-bottom: 20px;
+    margin-bottom: 80px;
   }
   .sig-bottom {
     position: relative;
@@ -283,15 +284,15 @@ function commercialTemplate(doc) {
   }
   .sig-stamp-overlay {
     position: absolute;
-    bottom: -140px;
-    left: 60px;
+    bottom: -75px;
+    left: 80px;
     z-index: 1;
   }
   .signstamp-img {
-    width: 68mm;
-    height: 68mm;
+    width: 160px;
+    height: 160px;
     object-fit: contain;
-}
+  }
 </style>
 <body>
 
