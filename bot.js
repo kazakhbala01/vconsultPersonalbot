@@ -1267,9 +1267,18 @@ function showKPDraft(ctx, uid, doc, kpData, seller) {
   const draftLines = [];
   draftLines.push(`📊 Коммерческое предложение`);
   draftLines.push(`📄 ${kpData.subtitle || ""}`);
+
+  // Стороны
   draftLines.push(``);
-  if (seller?.name) draftLines.push(`🏢 Исполнитель: ${seller.name}`);
-  if (kpData.buyer?.name) draftLines.push(`👤 Клиент: ${kpData.buyer.name}${kpData.buyer.bin ? ` (${kpData.buyer.bin})` : ""}${kpData.buyer.address ? `, ${kpData.buyer.address}` : ""}`);
+  if (seller?.name) {
+    draftLines.push(`🏢 Исполнитель: ${seller.name}`);
+    if (seller.bin) draftLines.push(`   БИН: ${seller.bin}`);
+  }
+  if (kpData.buyer?.name) {
+    draftLines.push(`👤 Клиент: ${kpData.buyer.name}`);
+    if (kpData.buyer.bin) draftLines.push(`   БИН: ${kpData.buyer.bin}`);
+    if (kpData.buyer.address) draftLines.push(`   Адрес: ${kpData.buyer.address}`);
+  }
 
   // 1. Работы (фильтруем пустые)
   const validItems = (kpData.items || []).filter(i => i.name && (i.price || 0) > 0);
@@ -1277,24 +1286,31 @@ function showKPDraft(ctx, uid, doc, kpData, seller) {
     draftLines.push(``);
     draftLines.push(`📦 1. Состав и стоимость работ:`);
     validItems.forEach((item, i) => {
-      draftLines.push(`  ${i + 1}. ${item.name} — ${(item.price || 0).toLocaleString("ru")} ₸`);
+      draftLines.push(`   ${i + 1}. ${item.name}`);
+      draftLines.push(`      💵 ${(item.price || 0).toLocaleString("ru")} ₸`);
     });
+    draftLines.push(``);
     draftLines.push(`💰 Итого: ${(kpData.total || 0).toLocaleString("ru")} ₸`);
-    if (kpData.totalWords) draftLines.push(`💬 ${kpData.totalWords} тенге`);
+    if (kpData.totalWords) draftLines.push(`   (${kpData.totalWords}) тенге`);
   }
 
   // 2. Сроки
+  draftLines.push(``);
   if (kpData.deadline) {
-    draftLines.push(``);
-    draftLines.push(`📌 2. Сроки: ${kpData.deadline}`);
+    draftLines.push(`📌 2. Сроки выполнения работ:`);
+    draftLines.push(`   ${kpData.deadline}`);
+  } else {
+    draftLines.push(`📌 2. Сроки: не указаны (AI определит автоматически)`);
   }
 
   // 3. Оплата
   const payments = kpData.paymentBullets || [];
+  draftLines.push(``);
   if (payments.length) {
-    draftLines.push(``);
     draftLines.push(`💳 3. Условия оплаты:`);
     payments.forEach(b => draftLines.push(`   • ${b}`));
+  } else {
+    draftLines.push(`💳 3. Условия оплаты: 50/50 (по умолчанию)`);
   }
 
   // 4. Доп.условия
@@ -1305,10 +1321,11 @@ function showKPDraft(ctx, uid, doc, kpData, seller) {
     extras.forEach(b => draftLines.push(`   • ${b}`));
   }
 
+  // Что будет в PDF
   draftLines.push(``);
   draftLines.push(`─────────────────────`);
   draftLines.push(`✅ Да — сгенерировать PDF`);
-  draftLines.push(`✏️ Изменить — отправить заново`);
+  draftLines.push(`✏️ Изменить — написать что поменять`);
   draftLines.push(`❌ Отмена`);
 
   states.set(uid, { mode: "doc_confirm", document: doc, rawText: "", docType: "commercial" });
