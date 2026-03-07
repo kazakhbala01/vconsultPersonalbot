@@ -158,7 +158,7 @@ body{font-family:'DejaVu Sans','Arial',sans-serif;font-size:11px;color:#1a1a1a;l
 
 /* ═══ SIGNATURE ═══ */
 .sig-section{margin-top:40px;position:relative;}
-.sig-role{font-size:12px;color:#1a1a1a;margin-bottom:20px;}
+.sig-role{font-size:12px;color:#1a1a1a;margin-bottom:10px;}
 .sig-area{position:relative;height:120px;}
 .sig-stamp{position:absolute;bottom:-140px;left:80px;z-index:1;}
 .signstamp-img{width:68mm;height:68mm;object-fit:contain;}
